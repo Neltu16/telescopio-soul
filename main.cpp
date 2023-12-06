@@ -37,12 +37,10 @@ int main(int argc, char* argv[]) {
         std::cerr << "Error al abrir uno de los archivos\n";
         return 1;
     }
-    // Crear una matriz para almacenar los píxeles de todos los canales durante la ejecución
-    Pixel** allPixels = new Pixel*[height];
-    for (int i = 0; i < height; ++i) {
-        allPixels[i] = new Pixel[width];
-    }
-    // Leer los valores de los archivos y almacenarlos en la matriz única
+
+    // Crear un solo arreglo para almacenar los píxeles de todos los canales
+    unsigned char* imagePixels = new unsigned char[width * height * channels];
+    // Leer los valores de los archivos y almacenarlos directamente en el arreglo unidimensional
     for (int i = 0; i < height; ++i) {
         for (int j = 0; j < width; ++j) {
             // Leer los valores de los archivos alfa.txt, verde.txt, rojo.txt y azul.txt
@@ -53,16 +51,16 @@ int main(int argc, char* argv[]) {
             azulFile >> azulValue;
             promedioFile >> promedioValue;
 
-            // Convertir a entero y almacenar en la matriz única
+            // Convertir a entero y almacenar directamente en el arreglo unidimensional
             if (alfaValue == "*" || verdeValue == "*" || rojoValue == "*" || azulValue == "*") {
                 // Valor perdido, utilizar el valor correspondiente de promedio.txt
-                allPixels[i][j].green = std::stoi(promedioValue);
-                allPixels[i][j].red = std::stoi(promedioValue);
-                allPixels[i][j].blue = std::stoi(promedioValue);
+                imagePixels[(i * width + j) * channels] = static_cast<unsigned char>(std::stoi(promedioValue));
+                imagePixels[(i * width + j) * channels + 1] = static_cast<unsigned char>(std::stoi(promedioValue));
+                imagePixels[(i * width + j) * channels + 2] = static_cast<unsigned char>(std::stoi(promedioValue));
             } else {
-                allPixels[i][j].green = std::stoi(verdeValue);
-                allPixels[i][j].red = std::stoi(rojoValue);
-                allPixels[i][j].blue = std::stoi(azulValue);
+                imagePixels[(i * width + j) * channels] = static_cast<unsigned char>(std::stoi(rojoValue));
+                imagePixels[(i * width + j) * channels + 1] = static_cast<unsigned char>(std::stoi(verdeValue));
+                imagePixels[(i * width + j) * channels + 2] = static_cast<unsigned char>(std::stoi(azulValue));
             }
         }
     }
@@ -74,24 +72,10 @@ int main(int argc, char* argv[]) {
     azulFile.close();
     promedioFile.close();
 
-    // Crear una matriz de píxeles para la imagen combinada
-    unsigned char* imagePixels = new unsigned char[width * height * channels];
-    for (int i = 0; i < height; ++i) {
-        for (int j = 0; j < width; ++j) {
-            imagePixels[(i * width + j) * channels] = static_cast<unsigned char>(allPixels[i][j].red);
-            imagePixels[(i * width + j) * channels + 1] = static_cast<unsigned char>(allPixels[i][j].green);
-            imagePixels[(i * width + j) * channels + 2] = static_cast<unsigned char>(allPixels[i][j].blue);
-        }
-    }
-
     // Escribir la imagen en formato PNG
     stbi_write_png("combinada_image.png", width, height, channels, imagePixels, width * channels);
 
     // Liberar la memoria
-    for (int i = 0; i < height; ++i) {
-        delete[] allPixels[i];
-    }
-    delete[] allPixels;
     delete[] imagePixels;
 
     return 0;
