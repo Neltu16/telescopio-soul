@@ -18,5 +18,5 @@ stb_image_write.h: Biblioteca para escribir imágenes en formato PNG.
 
 Notas
 Los archivos de entrada deben contener valores válidos para los píxeles de los canales. El programa maneja el caso especial donde un canal tiene el valor "*", utilizando el valor promedio en su lugar. (temporal)
-Espero que encuentres útil este programa. ¡Disfruta creando imágenes combinadas
+
 
