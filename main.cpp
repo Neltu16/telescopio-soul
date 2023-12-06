@@ -4,6 +4,14 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "lib/stb_image_write.h"
 
+const int width = 10681;
+const int height = 7121;
+const int channels = 3;
+
+unsigned char getValue(const std::string& value, const std::string& promedioValue) {
+    return (value == "*") ? static_cast<unsigned char>(std::stoi(promedioValue)) : static_cast<unsigned char>(std::stoi(value));
+}
+
 int main(int argc, char* argv[]) {
     if (argc != 6) {
         std::cerr << "Uso: " << argv[0] << " alfa.txt rojo.txt verde.txt azul.txt promedio.txt\n";
@@ -16,39 +24,30 @@ int main(int argc, char* argv[]) {
     const char* azulFilename = argv[4];
     const char* promedioFilename = argv[5];
 
-    const int width = 10681;
-    const int height = 7121;
-    const int channels = 3;  // Rojo, verde y azul STB no soporta alfa
-
     // Abrir los archivos
-    std::ifstream alfaFile(alfaFilename);
-    std::ifstream rojoFile(rojoFilename);
-    std::ifstream verdeFile(verdeFilename);
-    std::ifstream azulFile(azulFilename);
-    std::ifstream promedioFile(promedioFilename);
+    std::ifstream alfaFile(alfaFilename), rojoFile(rojoFilename), verdeFile(verdeFilename), azulFile(azulFilename), promedioFile(promedioFilename);
 
-    if (!alfaFile.is_open() || !rojoFile.is_open() || !verdeFile.is_open() || !azulFile.is_open() || !promedioFile.is_open()) {
+    if (!(alfaFile && rojoFile && verdeFile && azulFile && promedioFile)) {
         std::cerr << "Error al abrir uno de los archivos\n";
         return 1;
     }
 
     // Crear un solo arreglo para almacenar los píxeles de todos los canales
-    unsigned char* imagePixels = new unsigned char[width * height * channels];
+    auto* imagePixels = new unsigned char[width * height * channels];
     // Leer los valores de los archivos y almacenarlos directamente en el arreglo unidimensional
     for (int i = 0; i < height; ++i) {
         for (int j = 0; j < width; ++j) {
-            // Leer los valores de los archivos alfa.txt, verde.txt, rojo.txt y azul.txt
-            std::string alfaValue, verdeValue, rojoValue, azulValue, promedioValue;
-            alfaFile >> alfaValue;
+            std::string verdeValue, rojoValue, azulValue, promedioValue;
+
             verdeFile >> verdeValue;
             rojoFile >> rojoValue;
             azulFile >> azulValue;
             promedioFile >> promedioValue;
 
             // Convertir a entero y almacenar directamente en el arreglo unidimensional
-            imagePixels[(i * width + j) * channels] = (rojoValue == "*") ? static_cast<unsigned char>(std::stoi(promedioValue)) : static_cast<unsigned char>(std::stoi(rojoValue));
-            imagePixels[(i * width + j) * channels + 1] = (verdeValue == "*") ? static_cast<unsigned char>(std::stoi(promedioValue)) : static_cast<unsigned char>(std::stoi(verdeValue));
-            imagePixels[(i * width + j) * channels + 2] = (azulValue == "*") ? static_cast<unsigned char>(std::stoi(promedioValue)) : static_cast<unsigned char>(std::stoi(azulValue));
+            imagePixels[(i * width + j) * channels] = getValue(rojoValue, promedioValue);
+            imagePixels[(i * width + j) * channels + 1] = getValue(verdeValue, promedioValue);
+            imagePixels[(i * width + j) * channels + 2] = getValue(azulValue, promedioValue);
         }
     }
 
