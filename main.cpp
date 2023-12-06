@@ -46,16 +46,9 @@ int main(int argc, char* argv[]) {
             promedioFile >> promedioValue;
 
             // Convertir a entero y almacenar directamente en el arreglo unidimensional
-            if (alfaValue == "*" || verdeValue == "*" || rojoValue == "*" || azulValue == "*") {
-                // Valor perdido, utilizar el valor correspondiente de promedio.txt
-                imagePixels[(i * width + j) * channels] = static_cast<unsigned char>(std::stoi(promedioValue));
-                imagePixels[(i * width + j) * channels + 1] = static_cast<unsigned char>(std::stoi(promedioValue));
-                imagePixels[(i * width + j) * channels + 2] = static_cast<unsigned char>(std::stoi(promedioValue));
-            } else {
-                imagePixels[(i * width + j) * channels] = static_cast<unsigned char>(std::stoi(rojoValue));
-                imagePixels[(i * width + j) * channels + 1] = static_cast<unsigned char>(std::stoi(verdeValue));
-                imagePixels[(i * width + j) * channels + 2] = static_cast<unsigned char>(std::stoi(azulValue));
-            }
+            imagePixels[(i * width + j) * channels] = (rojoValue == "*") ? static_cast<unsigned char>(std::stoi(promedioValue)) : static_cast<unsigned char>(std::stoi(rojoValue));
+            imagePixels[(i * width + j) * channels + 1] = (verdeValue == "*") ? static_cast<unsigned char>(std::stoi(promedioValue)) : static_cast<unsigned char>(std::stoi(verdeValue));
+            imagePixels[(i * width + j) * channels + 2] = (azulValue == "*") ? static_cast<unsigned char>(std::stoi(promedioValue)) : static_cast<unsigned char>(std::stoi(azulValue));
         }
     }
 
@@ -74,7 +67,6 @@ int main(int argc, char* argv[]) {
 
     return 0;
 }
-
 
 
 
