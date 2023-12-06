@@ -4,12 +4,6 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "lib/stb_image_write.h"
 
-struct Pixel {
-    int green;
-    int red;
-    int blue;
-};
-
 int main(int argc, char* argv[]) {
     if (argc != 6) {
         std::cerr << "Uso: " << argv[0] << " alfa.txt rojo.txt verde.txt azul.txt promedio.txt\n";
