@@ -1,16 +1,12 @@
 #include <iostream>
 #include <fstream>
+#include <chrono>
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "lib/stb_image_write.h"
 
 const int width = 10681;
 const int height = 7121;
-const int channels = 3;
-
-// Retorna un valor dependiendo de dos casos para cada canal, si es "*" retonará promedio sino el mismo valor del canal de color
-unsigned char getValue(const std::string& value, const std::string& promedioValue) {
-    return (value == "*") ? static_cast<unsigned char>(std::stoi(promedioValue)) : static_cast<unsigned char>(std::stoi(value));
-}
+const int channels = 4;  // (R, G, B, A)
 
 void closeFiles(std::ifstream& alfaFile, std::ifstream& rojoFile, std::ifstream& verdeFile, std::ifstream& azulFile, std::ifstream& promedioFile) {
     alfaFile.close();
@@ -26,6 +22,9 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    // Obtener el tiempo de inicio
+    auto start_time = std::chrono::high_resolution_clock::now();
+
     // Abrir los archivos directamente con los nombres obtenidos de argv
     std::ifstream alfaFile(argv[1]), rojoFile(argv[2]), verdeFile(argv[3]), azulFile(argv[4]), promedioFile(argv[5]);
 
@@ -40,18 +39,22 @@ int main(int argc, char* argv[]) {
     // Leer los valores de los archivos y almacenarlos directamente en el arreglo
     for (int i = 0; i < height; ++i) {
         for (int j = 0; j < width; ++j) {
-            std::string verdeValue, rojoValue, azulValue, promedioValue;
+            std::string alfaValue, rojoValue, verdeValue, azulValue, promedioValue;
 
-            verdeFile >> verdeValue;
+            alfaFile >> alfaValue;
             rojoFile >> rojoValue;
+            verdeFile >> verdeValue;
             azulFile >> azulValue;
             promedioFile >> promedioValue;
 
-            // Convertir a entero y almacenar directamente en el arreglo unidimensional (R,G,B) y se repite...
+            // Convertir a entero y almacenar directamente en el arreglo unidimensional (R,G,B,A) y se repite...
             int index = (i * width + j) * channels;
-            imagePixels[index] = getValue(rojoValue, promedioValue);
-            imagePixels[index + 1] = getValue(verdeValue, promedioValue);
-            imagePixels[index + 2] = getValue(azulValue, promedioValue);
+
+            // Modificar según tus condiciones
+            imagePixels[index]     = (rojoValue == "*") ? static_cast<unsigned char>(std::stoi(promedioValue) * 0.3) : static_cast<unsigned char>(std::stoi(rojoValue));
+            imagePixels[index + 1] = (verdeValue == "*") ? static_cast<unsigned char>(std::stoi(promedioValue) * 0.59) : static_cast<unsigned char>(std::stoi(verdeValue));
+            imagePixels[index + 2] = (azulValue == "*") ? static_cast<unsigned char>(std::stoi(promedioValue) * 0.11) : static_cast<unsigned char>(std::stoi(azulValue));
+            imagePixels[index + 3] = static_cast<unsigned char>(std::stoi(alfaValue));
         }
     }
 
@@ -60,6 +63,11 @@ int main(int argc, char* argv[]) {
 
     // Escribir la imagen en formato PNG
     stbi_write_png("combinada_image.png", width, height, channels, imagePixels, width * channels);
+
+    // Obtener el tiempo de finalización
+    auto end_time = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+    std::cout << "Tiempo transcurrido: " << duration.count() << " milisegundos\n";
 
     // Liberar la memoria
     delete[] imagePixels;
