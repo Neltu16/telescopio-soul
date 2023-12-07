@@ -1,0 +1,2 @@
+El binario debería compilarse en este carpeta.
+
