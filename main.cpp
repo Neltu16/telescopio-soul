@@ -35,11 +35,15 @@ int main(int argc, char* argv[]) {
 
     // Crear un solo arreglo para almacenar los píxeles de todos los canales, movimiento a través de files, columnas y su color
     auto* imagePixels = new unsigned char[width * height * channels];
-
+    std::string alfaValue, rojoValue, verdeValue, azulValue, promedioValue;
+    alfaValue.reserve(3);  // Ajusta el tamaño según la longitud máxima esperada
+    rojoValue.reserve(3);
+    verdeValue.reserve(3);
+    azulValue.reserve(3);
+    promedioValue.reserve(3);
     // Leer los valores de los archivos y almacenarlos directamente en el arreglo
     for (int i = 0; i < height; ++i) {
         for (int j = 0; j < width; ++j) {
-            std::string alfaValue, rojoValue, verdeValue, azulValue, promedioValue;
 
             alfaFile >> alfaValue;
             rojoFile >> rojoValue;
