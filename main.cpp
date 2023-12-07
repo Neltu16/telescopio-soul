@@ -3,7 +3,7 @@
 #include <chrono>
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "lib/stb_image_write.h"
-
+#include "mpi.h"
 const int width = 10681;
 const int height = 7121;
 const int channels = 4;  // (R, G, B, A)

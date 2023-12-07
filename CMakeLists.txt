@@ -1,14 +1,16 @@
-cmake_minimum_required(VERSION 3.26)
-
+cmake_minimum_required(VERSION 3.23)
 project(telescopio_soul)
 
-set(CMAKE_CXX_STANDARD 23)
-
-include_directories(lib)
-include_directories(${MSMPI_INC})
 find_package(MPI REQUIRED)
-add_executable(telescopio_soul
-        lib/stb_image_write.h
-        main.cpp)
+set(MPI_CXX_LIBRARIES ${MPI_CXX_LIBRARIES})
 
-target_link_libraries(telescopio_soul PUBLIC MPI::MPI_CXX)
+include_directories(${MPI_INCLUDE_PATH})
+
+set(CMAKE_CXX_COMPILER mpicxx)
+set(CMAKE_C_COMPILER mpicc)
+
+set(CMAKE_CXX_STANDARD 14)
+
+add_executable(telescopio_soul main.cpp)
+
+target_link_libraries(telescopio_soul ${MPI_CXX_LIBRARIES})
