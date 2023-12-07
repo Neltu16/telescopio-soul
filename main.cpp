@@ -1,9 +1,12 @@
 #include <iostream>
 #include <fstream>
 #include <chrono>
+#include <vector>
+#include <mpi.h>
 #define STB_IMAGE_WRITE_IMPLEMENTATION
+#define STB_IMAGE_IMPLEMENTATION
 #include "lib/stb_image_write.h"
-#include "mpi.h"
+#include "lib/stb_image.h"
 
 const int width = 10681;
 const int height = 7121;
@@ -15,6 +18,12 @@ void closeFiles(std::ifstream& alfaFile, std::ifstream& rojoFile, std::ifstream&
     verdeFile.close();
     azulFile.close();
     promedioFile.close();
+}
+
+void combineImages(const std::vector<unsigned char>& imagePixels, const std::string& outputFile) {
+    int total_height = height;
+
+    stbi_write_png(outputFile.c_str(), width, total_height, channels, imagePixels.data(), width * channels);
 }
 
 int main(int argc, char* argv[]) {
@@ -55,8 +64,8 @@ int main(int argc, char* argv[]) {
         promedioFile.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     }
 
-    // Crear un solo arreglo para almacenar los píxeles de todos los canales
-    auto* imagePixels = new unsigned char[width * channels * rows_per_process];
+    // Crear un solo vector para almacenar los píxeles de todos los canales
+    std::vector<unsigned char> imagePixels(width * channels * rows_per_process);
     std::string alfaValue, rojoValue, verdeValue, azulValue, promedioValue;
     alfaValue.reserve(3);  // Ajusta el tamaño según la longitud máxima esperada
     rojoValue.reserve(3);
@@ -64,7 +73,7 @@ int main(int argc, char* argv[]) {
     azulValue.reserve(3);
     promedioValue.reserve(3);
 
-    // Leer los valores de los archivos y almacenarlos directamente en el arreglo
+    // Leer los valores de los archivos y almacenarlos directamente en el vector
     for (int i = 0; i < rows_per_process; ++i) {
         for (int j = 0; j < width; ++j) {
             alfaFile >> alfaValue;
@@ -91,41 +100,29 @@ int main(int argc, char* argv[]) {
     // Cerrar los archivos
     closeFiles(alfaFile, rojoFile, verdeFile, azulFile, promedioFile);
 
-    // Recolectar los datos de cada proceso en el proceso 0
-    if (rank == 0) {
-        auto* combinedPixels = new unsigned char[width * channels * height];
+    // Crear un vector para almacenar los píxeles recopilados en el proceso 0
+    std::vector<unsigned char> receivedPixels(width * channels * rows_per_process * size);
 
-        MPI_Gather(imagePixels, width * channels * rows_per_process, MPI_UNSIGNED_CHAR,
-                   combinedPixels, width * channels * rows_per_process, MPI_UNSIGNED_CHAR,
-                   0, MPI_COMM_WORLD);
-
-        // Escribir la imagen en formato PNG
-        if (rank == 0) {
-            stbi_write_png("combinada_image.png", width, height, channels, combinedPixels, width * channels);
-            delete[] combinedPixels;
-        }
-    } else {
-        // Enviar los datos del proceso actual al proceso 0
-        MPI_Gather(imagePixels, width * channels * rows_per_process, MPI_UNSIGNED_CHAR,
-                   nullptr, 0, MPI_UNSIGNED_CHAR,
-                   0, MPI_COMM_WORLD);
-    }
+    // Enviar la información al proceso 0 para que combine las imágenes
+    MPI_Gather(imagePixels.data(), imagePixels.size(), MPI_UNSIGNED_CHAR,
+               receivedPixels.data(), imagePixels.size(), MPI_UNSIGNED_CHAR, 0, MPI_COMM_WORLD);
 
     // Obtener el tiempo de finalización
     auto end_time = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
-
-    if (rank == 0) {
-        std::cout << "Tiempo transcurrido: " << duration.count() << " milisegundos\n";
-    }
+    std::cout << "Proceso " << rank << ": Tiempo transcurrido: " << duration.count() << " milisegundos\n";
 
     // Liberar la memoria
-    delete[] imagePixels;
-
     MPI_Finalize();
+
+    // Combina las imágenes en el proceso 0 y genera el archivo final
+    if (rank == 0) {
+        combineImages(receivedPixels, "combined_image.png");
+    }
 
     return 0;
 }
+
 
 
 
