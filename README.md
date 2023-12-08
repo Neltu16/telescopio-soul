@@ -25,7 +25,7 @@ Instalar OpenMPI
 2. Acceder al directorio del projecto y ejecutar ```cmake .``` y luego ```make```
 3. El binario debería encontrarse en la carpeta **dist/telescopio_soul.exe** acceder al directorio y arrastar el hostfile correspondiente en conjunto de los archivos .txt
 5. Debería recibir los argumentos con ```mpirun -hostfile maquinas.txt ./telescopio_soul alfa.txt rojo.txt verde.txt azul.txt promedio.txt```
-6. Debido al tamaño de los archivos y que no se especifica en las instrucciones debería haber una copia de los archivos .txt en una ruta similar en cada nodo en conjunto a su binario y los archivos .txt y hostfile.
+6. Debido al tamaño de los archivos y que no se especifica en las instrucciones debería haber una copia de los archivos .txt en una ruta similar en cada nodo en conjunto a su binario y los archivos .txt y hostfile. Otra alternativa es clonar el repositorio a una carpeta compartida que todos los nodos tengan acceso.
 
 El programa realiza lo siguiente:  
 1. Abre los archivos de texto con los argumentos proporcionados  
