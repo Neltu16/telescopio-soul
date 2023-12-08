@@ -15,7 +15,7 @@ Actualizar el Sistema
 
 ```sudo apt update```
 
-## Instalar OpenMPI
+Instalar OpenMPI
 
 ```sudo apt install openmpi-bin libopenmpi-dev```  
 
