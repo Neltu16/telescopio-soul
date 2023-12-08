@@ -11,7 +11,7 @@
 
 const int width = 10681;
 const int height = 7121;
-const int channels = 4;  // (R, G, B, A)
+const int channels = 4; // (R, G, B, A)
 
 void closeFiles(std::ifstream& alfaFile, std::ifstream& rojoFile, std::ifstream& verdeFile, std::ifstream& azulFile, std::ifstream& promedioFile) {
     alfaFile.close();
