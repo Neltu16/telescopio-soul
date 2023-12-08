@@ -5,9 +5,8 @@
 #include <mpi.h>
 #include <limits>
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#define STB_IMAGE_IMPLEMENTATION
 #include "stb_image_write.h"
-#include "stb_image.h"
+
 
 const int width = 10681;
 const int height = 7121;
