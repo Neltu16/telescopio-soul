@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-    // Obtener el número de nodos del archivo de host
+
     int num_nodes;
     std::ifstream hostfile("maquinas.txt");
     if (!hostfile) {
@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) {
 
     std::vector<std::string> nodes;
     std::string node;
-    while (hostfile >> node) {
+    while (hostfile >> node) { // Cantidad de nodos en hostfile
         nodes.push_back(node);
     }
 
@@ -142,6 +142,7 @@ int main(int argc, char* argv[]) {
 
     return 0;
 }
+
 
 
 
