@@ -38,11 +38,11 @@ Nota: Los archivos de entrada deben contener valores válidos para los píxeles 
 Se utilizó la formula promedio = R*0.3 + G*0.59 + B*0.11 en un inicio pero se descartó debido a que los resultados al generar imagenes  con los casos eran peores que utilizar simplemente el factor de aporte del color.
 
 La implementación consistía en los siguientes casos: 
-RVA = "*"
-RV = "*"
-R A = "*"
-VA = "*"
-Solo uno de los 3 es = "*" o ninguno
+RVA == *
+RV == *
+R A == *
+VA == *
+Solo uno de los 3 es == * o ninguno
 
 Este bloque de código añadía alrededor de 10-14 segundos en una máquina virtual ubuntu con dos núcleos asignados de manera local.
 ```
