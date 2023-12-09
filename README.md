@@ -35,11 +35,50 @@ El programa realiza lo siguiente:
 5. Los tiempos que imprime solo se relacionan con la recolección de valores de los canales y no toma en cuenta la generación de imagen final.
 Nota: Los archivos de entrada deben contener valores válidos para los píxeles de los canales. El programa maneja el caso especial donde un canal puede tener el valor "*", utilizando el valor promedio para calcularlo en su lugar.
 
+Se utilizó la formula promedio = R*0.3 + G*0.59 + B*0.11 en un inicio pero se descartó debido a que los resultados al generar imagenes  con los casos eran peores que utilizar simplemente el factor de aporte del color.
 
+La implementación consistía en los siguientes casos: 
+RVA = "*"
+RV = "*"
+R A = "*"
+VA = "*"
+Solo uno de los 3 es = "*" o ninguno
 
-
-
-
+Este bloque de código añadía alrededor de 10-14 segundos en una máquina virtual ubuntu con dos núcleos asignados de manera local.
+```
+if (rojoValue == "*" && verdeValue == "*" && azulValue == "*") {
+                    // Caso: RVA = "*"
+                    imageBlocks[localIndex] = static_cast<unsigned char>(std::stoi(promedioValue))*0.3;
+                    imageBlocks[localIndex + 1 ]= static_cast<unsigned char>(std::stoi(promedioValue))*0.59;
+                    imageBlocks[localIndex + 2 ]= static_cast<unsigned char>(std::stoi(promedioValue)) * 0.11;
+                } else if (rojoValue == "*" && verdeValue == "*" && azulValue != "*") {
+                    // Caso: RV = "*"
+                    imageBlocks[localIndex] = static_cast<unsigned char>(std::stoi(promedioValue))*0.3;
+                    imageBlocks[localIndex + 1 ]= static_cast<unsigned char>(std::stoi(promedioValue))*0.59;
+                    imageBlocks[localIndex + 2 ]= static_cast<unsigned char>(std::stoi(azulValue));
+                } else if (rojoValue == "*" && verdeValue != "*" && azulValue == "*") {
+                    // Caso: R A = "*"
+                    imageBlocks[localIndex] = static_cast<unsigned char>(std::stoi(promedioValue))*0.3;
+                    imageBlocks[localIndex + 1 ]= static_cast<unsigned char>(std::stoi(verdeValue));
+                    imageBlocks[localIndex + 2 ]= static_cast<unsigned char>(std::stoi(promedioValue))*0.11;
+                } else if(rojoValue != "*" && verdeValue == "*" && azulValue == "*"){
+                    // Caso: VA = "*"
+                    imageBlocks[localIndex] = static_cast<unsigned char>(std::stoi(rojoValue));
+                    imageBlocks[localIndex + 1 ]= static_cast<unsigned char>(std::stoi(promedioValue))*0.59;
+                    imageBlocks[localIndex + 2 ]= static_cast<unsigned char>(std::stoi(promedioValue))*0.11;
+                } else {
+                    // Caso: solo uno de los 3 es "*" o ninguno
+                    imageBlocks[localIndex] = (rojoValue == "*")
+                                              ? static_cast<unsigned char>(std::min(std::max(0.0, (static_cast<double>(std::stoi(promedioValue)) - static_cast<double>(std::stoi(verdeValue)) * 0.59 - static_cast<double>(std::stoi(azulValue)) * 0.11) * 0.3), 255.0))
+                                              : static_cast<unsigned char>(std::stoi(rojoValue));
+                    imageBlocks[localIndex + 1] = (verdeValue == "*")
+                                                  ? static_cast<unsigned char>(std::min(std::max(0.0, (static_cast<double>(std::stoi(promedioValue)) - static_cast<double>(std::stoi(rojoValue)) * 0.3 - static_cast<double>(std::stoi(azulValue)) * 0.11) * 0.59), 255.0))
+                                                  : static_cast<unsigned char>(std::stoi(verdeValue));
+                    imageBlocks[localIndex + 2] = (azulValue == "*")
+                                                  ? static_cast<unsigned char>(std::min(std::max(0.0, (static_cast<double>(std::stoi(promedioValue)) - static_cast<double>(std::stoi(rojoValue)) * 0.3 - static_cast<double>(std::stoi(verdeValue)) * 0.59) * 0.11), 255.0))
+                                                  : static_cast<unsigned char>(std::stoi(azulValue));
+                }
+```
 
 
 
